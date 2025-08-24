@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chat With Us</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background: #1a1a2e; /* Dark blue-gray background */
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #e0e0e0; /* Soft light gray text */
+        }
+
+        .chat-container {
+            background: #16213e; /* Darker container background */
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 600px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-header {
+            background: #0f3460; /* Deep blue header */
+            color: #d3d3d3; /* Light gray for readability */
+            padding: 20px;
+            text-align: center;
+            border-bottom: 2px solid #1a759f; /* Soft teal accent */
+        }
+
+        .chat-header h1 {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .chat-body {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            max-height: 500px;
+            background: #1c2526; /* Dark muted green-gray */
+        }
+
+        .message {
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .user-message, .bot-message {
+            padding: 12px 18px;
+            border-radius: 15px;
+            max-width: 80%;
+            line-height: 1.5;
+            margin-bottom: 10px;
+            position: relative;
+        }
+
+        .user-message {
+            background: #2e4057; /* Dark slate blue */
+            color: #e0e0e0;
+            align-self: flex-end;
+            border-bottom-right-radius: 2px;
+        }
+
+        .bot-message {
+            background: #2a4d69; /* Darker blue */
+            color: #e0e0e0;
+            align-self: flex-start;
+            border-bottom-left-radius: 2px;
+        }
+
+        .chat-input {
+            display: flex;
+            padding: 15px;
+            background: #16213e;
+            border-top: 1px solid #1a759f;
+        }
+
+        #user-input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #1a759f;
+            border-radius: 25px;
+            font-size: 16px;
+            outline: none;
+            background: #1c2526;
+            color: #e0e0e0;
+            transition: border-color 0.3s;
+        }
+
+        #user-input:focus {
+            border-color: #2e8b57; /* Soft green for focus */
+        }
+
+        #send-btn {
+            background: #1a759f;
+            color: #e0e0e0;
+            border: none;
+            padding: 12px 20px;
+            margin-left: 10px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s;
+        }
+
+        #send-btn:hover {
+            background: #2e8b57;
+        }
+
+        .chat-footer {
+            padding: 10px 20px;
+            text-align: right;
+            background: #16213e;
+            border-top: 1px solid #1a759f;
+        }
+
+        .footer-label {
+            font-size: 14px;
+            color: #d3d3d3;
+            margin-right: 10px;
+        }
+
+        .message .edit-icon, .message .copy-icon {
+            position: absolute;
+            top: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+
+        .user-message .edit-icon {
+            right: 5px;
+            display: none;
+        }
+
+        .bot-message .copy-icon {
+            left: 5px;
+            display: none;
+        }
+
+        .message:hover .edit-icon,
+        .message:hover .copy-icon {
+            display: block;
+            opacity: 1;
+        }
+
+        .edit-icon::before {
+            content: "\270E";
+            color: #2e4057;
+        }
+
+        .copy-icon::before {
+            content: "\2398";
+            color: #2a4d69;
+        }
+
+        @media (max-width: 480px) {
+            .chat-container {
+                margin: 10px;
+            }
+
+            .chat-header h1 {
+                font-size: 20px;
+            }
+
+            #user-input, #send-btn {
+                font-size: 14px;
+            }
+
+            .footer-label {
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="chat-container">
+        <div class="chat-header">
+            <h1>Chat With Us</h1>
+        </div>
+        <div class="chat-body" id="chat-body">
+            <!-- Messages will be appended here -->
+        </div>
+        <div class="chat-footer">
+            <span class="footer-label">Powered by Pranoy PL</span>
+        </div>
+        <div class="chat-input">
+            <input type="text" id="user-input" placeholder="Type your message...">
+            <button id="send-btn">Send</button>
+        </div>
+    </div>
+
+    <script>
+        const chatBody = document.getElementById('chat-body');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+
+        function addMessage(content, isUser) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'message';
+            const messageContent = document.createElement('div');
+            messageContent.className = isUser ? 'user-message' : 'bot-message';
+            messageContent.textContent = content;
+
+            // Add edit icon for user messages
+            if (isUser) {
+                const editIcon = document.createElement('span');
+                editIcon.className = 'edit-icon';
+                messageContent.appendChild(editIcon);
+            }
+            // Add copy icon for bot messages
+            else {
+                const copyIcon = document.createElement('span');
+                copyIcon.className = 'copy-icon';
+                messageContent.appendChild(copyIcon);
+            }
+
+            messageDiv.appendChild(messageContent);
+            chatBody.appendChild(messageDiv);
+            chatBody.scrollTop = chatBody.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const message = userInput.value.trim();
+            if (!message) return;
+
+            addMessage(message, true);
+            userInput.value = '';
+
+            try {
+                const response = await fetch('/chat', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message })
+                });
+                const data = await response.json();
+                addMessage(data.response, false);
+            } catch (error) {
+                addMessage('Error: Could not connect to the server.', false);
+            }
+        }
+
+        sendBtn.addEventListener('click', sendMessage);
+        userInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') sendMessage();
+        });
+    </script>
+</body>
+</html>
